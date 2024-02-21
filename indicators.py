@@ -2,6 +2,7 @@ import numpy as np
 
 
 def RSI(prices, n_steps=14):
+    prices = np.array(prices)
     rsi_values = [None] * n_steps
     for i in range(n_steps, len(prices)):
         current_prices = prices[i - n_steps + 1 : i + 1]
@@ -26,7 +27,7 @@ def RSI(prices, n_steps=14):
 
 # making bollinger
 def extract_bb(prices, n_steps: int = 14):
-    bollinger_list = []
+    bollinger_list = [None] * n_steps
 
     for i in range(n_steps, len(prices)):
         mean_price = prices.iloc[i - n_steps : i + 1].mean()
