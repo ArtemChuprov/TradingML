@@ -1,4 +1,5 @@
 import numpy as np
+import pandas as pd
 
 
 def RSI(prices, n_steps=14):
@@ -81,3 +82,39 @@ def CMF(open, high, low, close, volume, n_steps: int = 14):
 
         cmf_list.append(cmf_val)
     return cmf_list
+
+
+def ADX(
+    high: pd.Series,
+    low: pd.Series,
+    close: pd.Series,
+    n_steps: int = 14,
+    alpha: float = 0.2,
+):
+    adx_list = [None] * n_steps
+
+    for i in range(n_steps, len(close)):
+        first = int(i == n_steps)
+        high_i = high.iloc[i - n_steps + first : i + 1].values
+        low_i = low.iloc[i - n_steps + first : i + 1].values
+        close_i = close.iloc[i - n_steps + first : i + 1].values
+
+        TR = np.maximum(high_i[1:] - low_i[1:], high_i[1:] - close_i[:-1])
+
+        pos_M, neg_M = (
+            high_i[1:] - high_i[:-1],
+            low_i[:-1] - low_i[1:],
+        )
+        pos_M[np.logical_or(pos_M < neg_M, pos_M < 0)] = 0
+        neg_M[np.logical_or(pos_M > neg_M, pos_M < 0)] = 0
+
+        pos_DI = pd.Series(pos_M / TR).ewm(alpha=alpha).mean()
+        neg_DI = pd.Series(neg_M / TR).ewm(alpha=alpha).mean()
+
+        adx_val = (
+            100
+            * ((pos_DI - neg_DI) / (pos_DI + neg_DI)).ewm(alpha=alpha).mean().iloc[-1]
+        )
+        adx_list.append(adx_val)
+
+    return adx_list
