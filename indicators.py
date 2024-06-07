@@ -84,6 +84,25 @@ def CMF(open, high, low, close, volume, n_steps: int = 14):
     return cmf_list
 
 
+def ATR(
+    high: pd.Series,
+    low: pd.Series,
+    close: pd.Series,
+    n_steps: int = 14,
+):
+    atr_list = [None] * n_steps
+
+    for i in range(n_steps, len(high)):
+        first = int(i == n_steps)
+        high_i = high.iloc[i - n_steps + first : i + 1].values
+        low_i = low.iloc[i - n_steps + first : i + 1].values
+        close_i = close.iloc[i - n_steps + first : i + 1].values
+        atr = ((high_i - low_i) / close_i * 100).mean()
+        atr_list.append(atr)
+
+    return atr_list
+
+
 def ADX(
     high: pd.Series,
     low: pd.Series,
